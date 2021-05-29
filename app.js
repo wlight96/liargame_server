@@ -129,8 +129,8 @@ app.post("/", (req, res) => {
 			liar: liar,
 			picked: voteState,
 		});
-	userID = [];
-	liar = null;
+		userID = [];
+		liar = null;
 });
 
 server.listen(port, () => {
