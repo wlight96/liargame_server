@@ -99,8 +99,8 @@ io.on("connection", (socket) => {
 		// 전부 소켓으로 하면 편하긴 한데 패킷 종류를 여러개로 해야되니까 어거지로 넣음..
 		res.send({ result: liar });
 		if (votecnt === 3)
-			io.emit("end", {
-				state: "end",
+			io.emit("result", {
+				state: "result",
 				liar: liar,
 				picked: voteState,
 			});	
