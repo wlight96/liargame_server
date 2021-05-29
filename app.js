@@ -124,17 +124,19 @@ app.post("/", (req, res) => {
 	// 그냥 형식적으로 보내주는 리스폰스
 	// 전부 소켓으로 하면 편하긴 한데 패킷 종류를 여러개로 해야되니까 어거지로 넣음..
 	res.send({ result: liar });
-	if (votecnt === 3)
+	if (votecnt === 3){
 		io.emit("end", {
 			state: "end",
 			liar: liar,
 			picked: voteState,
 		});
+		UserID = [];
+		liar = null;
+		console.log("초기화 이후 USER :",UserID);
+		console.log("초기화 이후 liar :",liar);
+	}
+	
 });
-UserID = [];
-liar = null;
-console.log("초기화 이후 USER :",UserID);
-console.log("초기화 이후 liar :",liar);
 server.listen(port, () => {
 	console.log(`Listening on port ${port}`);
 });
