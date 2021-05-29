@@ -104,6 +104,7 @@ io.on("connection", (socket) => {
 let votecnt = 0;
 let voteState = [];
 let voteToLiar = 0;
+
 app.post("/", (req, res) => {
 	votecnt += 1;
 	/*
@@ -129,10 +130,11 @@ app.post("/", (req, res) => {
 			liar: liar,
 			picked: voteState,
 		});
-		userID = [];
-		liar = null;
 });
-
+UserID = [];
+liar = null;
+console.log("초기화 이후 USER :",UserID);
+console.log("초기화 이후 liar :",liar);
 server.listen(port, () => {
 	console.log(`Listening on port ${port}`);
 });
