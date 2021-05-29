@@ -45,8 +45,9 @@ io.on("connection", (socket) => {
 		if (UserID.includes(data.player) === true) {
 			UserID.push(data.player+(UserID.length).toString());
 		}
-		else 
+		else{ 
 			UserID.push(data.player);
+		}
 		io.emit("enter", {
 			state: "enter",
 			player: UserID,
