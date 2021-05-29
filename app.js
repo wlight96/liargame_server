@@ -41,7 +41,12 @@ io.on("connection", (socket) => {
 	// 플레이어 들어올 때 마다 배열에 플레이어 이름 추가 되어 전송?
 	socket.on("enter", (data) => {
 		console.log(socket.id, ":", data.player, "입장");
-		UserID.push(data.player);
+		// UserID 가 겹치면 뒤에 배열 크기 만큼의 번호 붙이기
+		if (UserID.includes(data.player) === true) {
+			UserID.push(data.player+(UserID.length).toString());
+		}
+		else 
+			UserID.push(data.player);
 		io.emit("enter", {
 			state: "enter",
 			player: UserID,
@@ -60,9 +65,8 @@ io.on("connection", (socket) => {
 				liar: liar,
 				word: wordArr[randomNumber],
 			});
+			// TIMEout이 발생하여야 POST로 이어짐.
 			setTimeout(() => {
-				console.log("result liar : ",liar);
-				console.log("result voteState : ",voteState);
 				io.emit("result", {
 					state: "result",
 					liar: liar,
@@ -82,20 +86,6 @@ io.on("connection", (socket) => {
 		});
 	});
 
-	// vote data // 투표는 2번 하기 근데 이건 언제 하는데?
-	socket.on("vote", (data) => {
-		console.log(data.name, " vote to : ", data.vote);
-		VoteID.push({ name: data.name, vote: data.vote });
-		if (VoteID.length === 4) {
-			io.emit("result", {
-				state: "result",
-				liar: UserID[1],
-				picked: {
-					VoteID,
-				},
-			});
-		}
-	});
 	socket.on("disconnect", () => {
 		console.log("user disconnected");
 	});
@@ -130,10 +120,9 @@ app.post("/", (req, res) => {
 			liar: liar,
 			picked: voteState,
 		});
+	// 게임 종료 후 사용자 ID 배열 및 liar 초기화.
 		UserID = [];
 		liar = null;
-		console.log("초기화 이후 USER :",UserID);
-		console.log("초기화 이후 liar :",liar);
 	}
 	
 });
