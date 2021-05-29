@@ -11,7 +11,6 @@ const io = require("socket.io")(server, {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 const port = process.env.PORT || 3001;
 
 // 아이디 저장
@@ -36,18 +35,19 @@ var liar;
 
 io.on("connection", (socket) => {
 	console.log("a user connected");
-	// PORT에 socket id 알려주기
-	//io.to(socket.id).emit('my socket id',{socketID, socket.id});
-	// 플레이어 들어올 때 마다 배열에 플레이어 이름 추가 되어 전송?
+	// 플레이어 들어올 때 마다 배열에 플레이어 이름 추가 되어 전송
 	socket.on("enter", (data) => {
 		console.log(socket.id, ":", data.player, "입장");
+		//react 내에 nickname 따로 저장해두는거 있음? 
+
 		// UserID 가 겹치면 뒤에 배열 크기 만큼의 번호 붙이기
 		if (UserID.includes(data.player) === true) {
 			UserID.push(data.player+(UserID.length).toString());
 		}
-		else{ 
+		else { 
 			UserID.push(data.player);
 		}
+		console.log(socket.id, ":", data.player, "입장");
 		io.emit("enter", {
 			state: "enter",
 			player: UserID,
@@ -124,6 +124,9 @@ app.post("/", (req, res) => {
 	// 게임 종료 후 사용자 ID 배열 및 liar 초기화.
 		UserID = [];
 		liar = null;
+		voteState = [];
+		votecnt = 0;
+		voteToLiar = 0;
 	}
 	
 });
