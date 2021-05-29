@@ -34,10 +34,6 @@ var wordArr = [
 // 라이어
 var liar;
 
-let votecnt = 0;
-let voteState = [];
-let voteToLiar = 0;
-
 io.on("connection", (socket) => {
 	console.log("a user connected");
 	// PORT에 socket id 알려주기
@@ -54,6 +50,7 @@ io.on("connection", (socket) => {
 		if (UserID.length === 4) {
 			var randomNumber = Math.floor(Math.random() * 10);
 			// 라이어 기록하기.
+			console.log("game start before. liar is ", liar);
 			liar = UserID[randomNumber % 4];
 			console.log("game start. liar is ", liar);
 			// game set response
@@ -65,14 +62,16 @@ io.on("connection", (socket) => {
 			});
 			setTimeout(() => {
 				console.log("result liar : ",liar);
+				console.log("result voteState : ",voteState);
 				io.emit("result", {
 					state: "result",
 					liar: liar,
 					picked: voteState,
 				});
-			}, 300000);
+			}, 120000);
 		}
 	});
+
 	// 채팅 관련 송신 및 수신
 	socket.on("chat", (data) => {
 		console.log(data.player, ": ", data.text);
@@ -82,31 +81,9 @@ io.on("connection", (socket) => {
 			text: data.text,
 		});
 	});
-	// vote on response
-	app.post("/",(req,res) =>{
-		votecnt +=1;
-		try {
-			if (req.body.vote === liar) {
-				voteToLiar++;
-				console.log(voteToLiar);
-			}
-			voteState.push(req.body);
-			console.log(voteState);
-		} catch (e) {
-			console.log(e);
-		}
-		// 그냥 형식적으로 보내주는 리스폰스
-		// 전부 소켓으로 하면 편하긴 한데 패킷 종류를 여러개로 해야되니까 어거지로 넣음..
-		res.send({ result: liar });
-		if (votecnt === 3)
-			io.emit("result", {
-				state: "result",
-				liar: liar,
-				picked: voteState,
-			});	
-	});
+
 	// vote data // 투표는 2번 하기 근데 이건 언제 하는데?
-	/*socket.on("vote", (data) => {
+	socket.on("vote", (data) => {
 		console.log(data.name, " vote to : ", data.vote);
 		VoteID.push({ name: data.name, vote: data.vote });
 		if (VoteID.length === 4) {
@@ -119,12 +96,42 @@ io.on("connection", (socket) => {
 			});
 		}
 	});
-	*/
 	socket.on("disconnect", () => {
 		console.log("user disconnected");
 	});
 });
 
+let votecnt = 0;
+let voteState = [];
+let voteToLiar = 0;
+app.post("/", (req, res) => {
+	votecnt += 1;
+	/*
+	 * post body : { nickname : 보낸사람, vote : 누구에게 투표했는지 }
+	 * ex) {"문상혁" : "윤두현"}
+	 */
+	try {
+		if (req.body.vote === liar) {
+			voteToLiar++;
+			console.log(voteToLiar);
+		}
+		voteState.push(req.body);
+		console.log(voteState);
+	} catch (e) {
+		console.log(e);
+	}
+	// 그냥 형식적으로 보내주는 리스폰스
+	// 전부 소켓으로 하면 편하긴 한데 패킷 종류를 여러개로 해야되니까 어거지로 넣음..
+	res.send({ result: liar });
+	if (votecnt === 3)
+		io.emit("end", {
+			state: "end",
+			liar: liar,
+			picked: voteState,
+		});
+	userID = [];
+	liar = null;
+});
 
 server.listen(port, () => {
 	console.log(`Listening on port ${port}`);
